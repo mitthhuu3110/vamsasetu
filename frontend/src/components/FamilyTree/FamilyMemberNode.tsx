@@ -1,6 +1,6 @@
 import React from 'react';
-import { Handle, Position, NodeProps } from 'react-flow-renderer';
-import { FamilyMember } from '../../types';
+import { Handle, Position, NodeProps } from 'reactflow';
+import { FamilyMember } from '../../types/index.ts';
 
 interface FamilyMemberNodeData {
   member: FamilyMember;

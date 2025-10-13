@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthContextType, RegisterData } from '../types';
-import { authApi } from '../services/api';
+import { User, AuthContextType, RegisterData } from '../types/index.ts';
+// import { authApi } from '../services/api.ts';
 import toast from 'react-hot-toast';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,55 +14,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      fetchUserProfile();
-    } else {
-      setLoading(false);
-    }
+    // Temporarily skip auth bootstrap
+    setLoading(false);
   }, []);
 
-  const fetchUserProfile = async () => {
-    try {
-      const userData = await authApi.getProfile();
-      setUser(userData);
-    } catch (error) {
-      console.error('Failed to fetch user profile:', error);
-      localStorage.removeItem('authToken');
-    } finally {
-      setLoading(false);
-    }
+  // const fetchUserProfile = async () => {
+  //   try {
+  //     const userData = await authApi.getProfile();
+  //     setUser(userData);
+  //   } catch (error) {
+  //     console.error('Failed to fetch user profile:', error);
+  //     localStorage.removeItem('authToken');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const login = async (_email: string, _password: string) => {
+    // Skip API and set a mock user
+    setUser({
+      id: '1',
+      email: 'demo@example.com',
+      firstName: 'Demo',
+      lastName: 'User',
+      role: 'MEMBER' as any,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    toast.success('Signed in (demo)');
   };
 
-  const login = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      const response = await authApi.login(email, password);
-      localStorage.setItem('authToken', response.token);
-      setUser(response.user);
-      toast.success('Login successful!');
-    } catch (error: any) {
-      toast.error(error.message || 'Login failed');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (userData: RegisterData) => {
-    try {
-      setLoading(true);
-      const response = await authApi.register(userData);
-      localStorage.setItem('authToken', response.token);
-      setUser(response.user);
-      toast.success('Registration successful!');
-    } catch (error: any) {
-      toast.error(error.message || 'Registration failed');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  const register = async (_userData: RegisterData) => {
+    // Skip API and set a mock user
+    setUser({
+      id: '2',
+      email: 'newuser@example.com',
+      firstName: 'New',
+      lastName: 'User',
+      role: 'MEMBER' as any,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    toast.success('Registration successful (demo)');
   };
 
   const logout = () => {

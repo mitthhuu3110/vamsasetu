@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { User } from '../types';
+import { useAuth } from '../hooks/useAuth.ts';
+import { User } from '../types/index.ts';
 import { 
   UserIcon, 
   EnvelopeIcon, 

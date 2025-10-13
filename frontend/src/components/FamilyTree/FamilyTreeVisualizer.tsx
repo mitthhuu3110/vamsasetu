@@ -10,8 +10,9 @@ import ReactFlow, {
   Connection,
   NodeTypes,
   EdgeTypes,
-} from 'react-flow-renderer';
-import { FamilyMember, Relationship } from '../../types';
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+import { FamilyMember, Relationship } from '../../types/index.ts';
 import FamilyMemberNode from './FamilyMemberNode';
 import RelationshipEdge from './RelationshipEdge';
 

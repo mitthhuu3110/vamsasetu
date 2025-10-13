@@ -52,8 +52,9 @@ class ApiClient {
 
   private async request<T>(config: any): Promise<T> {
     try {
-      const response: AxiosResponse<ApiResponse<T>> = await this.client(config);
-      return response.data.data;
+      const response: AxiosResponse<any> = await this.client(config);
+      const body = response.data;
+      return (body && body.data !== undefined ? body.data : body) as T;
     } catch (error: any) {
       throw new Error(error.response?.data?.message || error.message || 'An error occurred');
     }

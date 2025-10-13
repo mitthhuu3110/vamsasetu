@@ -1,6 +1,6 @@
 import React from 'react';
-import { EdgeProps, getBezierPath, EdgeLabelRenderer, BaseEdge } from 'react-flow-renderer';
-import { RelationshipType } from '../../types';
+import { EdgeProps, getBezierPath, EdgeLabelRenderer, BaseEdge } from 'reactflow';
+import { RelationshipType } from '../../types/index.ts';
 
 interface RelationshipEdgeData {
   relationshipType: RelationshipType;

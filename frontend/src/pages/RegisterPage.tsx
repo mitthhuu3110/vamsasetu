@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
+import { useAuth } from '../hooks/useAuth.ts';
+import LoadingSpinner from '../components/UI/LoadingSpinner.tsx';
 
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({

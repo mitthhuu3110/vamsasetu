@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
-import { eventsApi } from '../services/api';
-import { Event, EventType } from '../types';
-import EventCard from '../components/Events/EventCard';
-import AddEventModal from '../components/Events/AddEventModal';
-import EventFilters from '../components/Events/EventFilters';
+import { Event, EventType } from '../types/index.ts';
+import EventCard from '../components/Events/EventCard.tsx';
+import AddEventModal from '../components/Events/AddEventModal.tsx';
+import EventFilters from '../components/Events/EventFilters.tsx';
 import { PlusIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 const EventsPage: React.FC = () => {
@@ -12,15 +10,37 @@ const EventsPage: React.FC = () => {
   const [selectedEventType, setSelectedEventType] = useState<EventType | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: events, isLoading, error, refetch } = useQuery(
-    'events',
-    () => eventsApi.getEvents(),
+  // Mock events (API skipped for now)
+  const events: Event[] = [
     {
-      refetchOnWindowFocus: false,
-    }
-  );
+      id: 'ev1',
+      title: "Ravi's Birthday",
+      description: 'Celebrate with family',
+      eventType: EventType.BIRTHDAY,
+      date: '2025-11-10',
+      isRecurring: true,
+      reminderSettings: { enabled: true, methods: [], advanceTime: 24 },
+      attendees: [],
+      createdBy: '1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: 'ev2',
+      title: 'Wedding Anniversary',
+      description: 'Dinner with close relatives',
+      eventType: EventType.ANNIVERSARY,
+      date: '2025-12-02',
+      isRecurring: true,
+      reminderSettings: { enabled: true, methods: [], advanceTime: 24 },
+      attendees: [],
+      createdBy: '1',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+  ];
 
-  const filteredEvents = events?.filter(event => {
+  const filteredEvents = events.filter(event => {
     const matchesType = selectedEventType === 'ALL' || event.eventType === selectedEventType;
     const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          event.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -35,24 +55,7 @@ const EventsPage: React.FC = () => {
     new Date(event.date) < new Date()
   ).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading events...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">Error loading events. Please try again.</p>
-      </div>
-    );
-  }
+  // Skip loading and error states while using mock data
 
   return (
     <div className="space-y-6">
@@ -170,10 +173,7 @@ const EventsPage: React.FC = () => {
       {showAddEvent && (
         <AddEventModal
           onClose={() => setShowAddEvent(false)}
-          onSuccess={() => {
-            setShowAddEvent(false);
-            refetch();
-          }}
+          onSuccess={() => setShowAddEvent(false)}
         />
       )}
     </div>
