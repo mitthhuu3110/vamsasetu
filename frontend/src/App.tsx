@@ -1,5 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { useAuth } from './hooks/useAuth.ts';
 import Layout from './components/Layout/Layout.tsx';
 import HomePage from './pages/HomePage.tsx';
@@ -10,7 +13,9 @@ import EventsPage from './pages/EventsPage.tsx';
 import ProfilePage from './pages/ProfilePage.tsx';
 import LoadingSpinner from './components/UI/LoadingSpinner.tsx';
 
-function App() {
+const queryClient = new QueryClient();
+
+function AppContent() {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -36,6 +41,18 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

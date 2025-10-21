@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FamilyMember, Relationship, Gender, RelationshipType } from '../types/index.ts';
-import FamilyTreeVisualizer from '../components/FamilyTree/FamilyTreeVisualizer.tsx';
+import AdvancedFamilyTreeVisualizer from '../components/FamilyTree/AdvancedFamilyTreeVisualizer.tsx';
 import MemberDetails from '../components/FamilyTree/MemberDetails.tsx';
 import AddMemberModal from '../components/FamilyTree/AddMemberModal.tsx';
-import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, SparklesIcon, HeartIcon } from '@heroicons/react/24/outline';
 
 const FamilyTreePage: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null);
@@ -85,39 +85,43 @@ const FamilyTreePage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-screen bg-gradient-to-br from-warm-beige to-cream dark:from-dark-bg dark:to-dark-card">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Family Tree</h1>
-          <p className="text-gray-600">Visualize and manage your family relationships</p>
+          <h1 className="text-3xl font-display font-bold text-gradient">
+            🌳 Family Tree
+          </h1>
+          <p className="text-warm-brown dark:text-dark-text mt-2">
+            Visualize and manage your family relationships with love
+          </p>
         </div>
         <button
           onClick={() => setShowAddMember(true)}
-          className="btn-primary flex items-center"
+          className="btn-primary flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          <PlusIcon className="w-5 h-5 mr-2" />
-          Add Member
+          <PlusIcon className="w-5 h-5" />
+          <span>Add Member</span>
         </button>
       </div>
 
       {/* Search and Filters */}
-      <div className="card">
+      <div className="card card-hover">
         <div className="flex items-center space-x-4">
           <div className="flex-1 relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-warm-brown dark:text-dark-text" />
             <input
               type="text"
               placeholder="Search family members..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field pl-10"
+              className="w-full pl-10 pr-4 py-3 bg-warm-beige dark:bg-dark-accent border border-gray-200 dark:border-dark-accent rounded-lg text-warm-brown dark:text-dark-text placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-soft-gold focus:border-transparent transition-all duration-200"
             />
           </div>
           <div className="flex space-x-2">
-            <button className="btn-secondary">All</button>
-            <button className="btn-secondary">Alive</button>
-            <button className="btn-secondary">Deceased</button>
+            <button className="btn-secondary text-sm">All</button>
+            <button className="btn-secondary text-sm">Alive</button>
+            <button className="btn-secondary text-sm">Deceased</button>
           </div>
         </div>
       </div>
@@ -125,12 +129,11 @@ const FamilyTreePage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Family Tree Visualizer */}
         <div className="lg:col-span-3">
-          <div className="card h-96">
-            <FamilyTreeVisualizer
-              members={familyData?.nodes || []}
+          <div className="card h-[600px] overflow-hidden">
+            <AdvancedFamilyTreeVisualizer
+              familyMembers={familyData?.nodes || []}
               relationships={familyData?.edges || []}
-              onMemberSelect={setSelectedMember}
-              selectedMember={selectedMember}
+              onMemberClick={setSelectedMember}
             />
           </div>
         </div>
@@ -144,27 +147,33 @@ const FamilyTreePage: React.FC = () => {
               onClose={() => setSelectedMember(null)}
             />
           ) : (
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Family Members</h3>
-              <div className="space-y-2 max-h-80 overflow-y-auto">
+            <div className="card card-hover">
+              <div className="flex items-center space-x-2 mb-4">
+                <HeartIcon className="w-5 h-5 text-soft-gold" />
+                <h3 className="text-lg font-display font-bold text-warm-brown dark:text-dark-text">
+                  Family Members
+                </h3>
+              </div>
+              <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-hide">
                 {filteredMembers.map((member) => (
                   <div
                     key={member.id}
                     onClick={() => setSelectedMember(member)}
-                    className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    className="p-3 hover:bg-warm-beige dark:hover:bg-dark-accent rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md border border-transparent hover:border-soft-gold"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span className="text-primary-600 font-medium">
+                      <div className="w-10 h-10 bg-gradient-to-br from-soft-gold to-deep-gold rounded-full flex items-center justify-center shadow-md">
+                        <span className="text-white font-bold text-sm">
                           {member.firstName[0]}{member.lastName[0]}
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-warm-brown dark:text-dark-text">
                           {member.firstName} {member.lastName}
                         </p>
-                        <p className="text-sm text-gray-500">
-                          {member.isAlive ? 'Alive' : 'Deceased'}
+                        <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center space-x-1">
+                          <span className={`w-2 h-2 rounded-full ${member.isAlive ? 'bg-soft-green' : 'bg-gray-400'}`}></span>
+                          <span>{member.isAlive ? 'Alive' : 'Deceased'}</span>
                         </p>
                       </div>
                     </div>
