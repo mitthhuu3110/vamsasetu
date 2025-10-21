@@ -1,9 +1,6 @@
 # VamsaSetu - Family Tree & Event Management System
 
 VamsaSetu is an intelligent, tree-based family relationship visualization and event system that helps users understand how they're related to others in their family, track events (birthdays, anniversaries, ceremonies), and receive smart reminders through WhatsApp, email, and SMS.
-
-## 🌟 Features
-
 ### Core Features
 - **Interactive Family Tree Visualizer**: Dynamic tree graph showing members as nodes and relations as edges
 - **Smart Relationship Engine**: Auto-derive relationships based on input with complex Indian relations support
