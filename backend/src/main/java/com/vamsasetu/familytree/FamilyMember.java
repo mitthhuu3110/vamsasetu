@@ -2,12 +2,14 @@ package com.vamsasetu.familytree;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import java.time.LocalDate;
 
 @Node("FamilyMember")
 public class FamilyMember {
     @Id
-    private String id;
+    @GeneratedValue
+    private Long id;
     private String name;
     private String gender;
     private LocalDate dateOfBirth;

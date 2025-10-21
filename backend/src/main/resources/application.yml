@@ -2,9 +2,9 @@ spring:
   profiles:
     active: dev
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:vamsasetu}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:password}
+    url: jdbc:postgresql://localhost:5432/vamsasetu
+    username: youruser
+    password: yourpassword
     driver-class-name: org.postgresql.Driver
   data:
     neo4j:

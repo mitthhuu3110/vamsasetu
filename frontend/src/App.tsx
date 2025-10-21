@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { LoginPage } from './components/LoginPage';
