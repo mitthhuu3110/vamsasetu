@@ -1,0 +1,19 @@
+# Intellij
+.idea/
+*.iml
+
+# Java & Spring Boot
+/target/
+*.class
+*.jar
+*.war
+*.log
+
+# Secrets
+.env
+
+# Maven
+.mvn/
+
+# Others
+.DS_Store
