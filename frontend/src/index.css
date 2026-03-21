@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* VamsaSetu Custom Colors */
+  --color-saffron: #E8650A;
+  --color-saffron-light: #F5A623;
+  --color-turmeric: #F5A623;
+  --color-ivory: #FBF5E6;
+  --color-teal: #0D4A52;
+  --color-teal-light: #0D9488;
+  --color-charcoal: #2C2420;
+  --color-rose: #E11D48;
+  --color-amber: #F59E0B;
+  --color-amber-light: #FCD34D;
+  
+  /* Custom Fonts */
+  --font-heading: "Playfair Display", serif;
+  --font-body: "DM Sans", sans-serif;
+  
+  /* Custom Breakpoints */
+  --breakpoint-mobile: 767px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1024px;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-ivory);
+    color: var(--color-charcoal);
+    font-family: var(--font-body);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+  
+  /* Visible focus indicators for keyboard navigation */
+  *:focus-visible {
+    outline: 2px solid var(--color-saffron);
+    outline-offset: 2px;
+  }
+  
+  /* Remove default focus outline for mouse users */
+  *:focus:not(:focus-visible) {
+    outline: none;
+  }
+  
+  /* Ensure all interactive elements are keyboard accessible */
+  button, a, input, select, textarea {
+    &:focus-visible {
+      outline: 2px solid var(--color-saffron);
+      outline-offset: 2px;
+    }
+  }
+}
+
+@layer components {
+  /* VamsaSetu custom component styles */
+  .rangoli-pattern {
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(232, 101, 10, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(13, 74, 82, 0.05) 0%, transparent 50%);
+  }
+}

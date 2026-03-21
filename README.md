@@ -23,18 +23,18 @@ VamsaSetu is an intelligent, tree-based family relationship visualization and ev
 ## 🏗️ Architecture
 
 ### Tech Stack
-- **Frontend**: React + TypeScript + Tailwind CSS + React Flow
-- **Backend**: Spring Boot + Java 17
+- **Frontend**: React + TypeScript + Vite + Tailwind CSS v4 + React Flow + Framer Motion
+- **Backend**: Go + Fiber + GORM
 - **Databases**: Neo4j (Graph) + PostgreSQL (Relational)
 - **Cache**: Redis
-- **Authentication**: JWT + Spring Security
+- **Authentication**: JWT
 - **Messaging**: Twilio (SMS/WhatsApp) + SendGrid (Email)
 - **Deployment**: Docker + Docker Compose
 
 ### System Architecture
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React App     │    │  Spring Boot    │    │   Databases     │
+│   React App     │    │   Go + Fiber    │    │   Databases     │
 │   (Frontend)    │◄──►│   (Backend)     │◄──►│ Neo4j + Postgres│
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
@@ -42,7 +42,7 @@ VamsaSetu is an intelligent, tree-based family relationship visualization and ev
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   WebSocket     │    │  Notification   │    │     Redis       │
-│   (Real-time)   │    │   Services      │    │    (Cache)      │
+│   (Real-time)   │    │   Scheduler     │    │    (Cache)      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
@@ -51,8 +51,7 @@ VamsaSetu is an intelligent, tree-based family relationship visualization and ev
 ### Prerequisites
 - Docker and Docker Compose
 - Node.js 18+ (for local development)
-- Java 17+ (for local development)
-- Maven 3.6+ (for local development)
+- Go 1.21+ (for local development)
 
 ### Using Docker (Recommended)
 
@@ -62,13 +61,19 @@ VamsaSetu is an intelligent, tree-based family relationship visualization and ev
    cd vamsasetu
    ```
 
-2. **Start all services**
+2. **Create environment file**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start all services**
    ```bash
    docker-compose up -d
    ```
 
-3. **Access the application**
-   - Frontend: http://localhost:3000
+4. **Access the application**
+   - Frontend: http://localhost:5173
    - Backend API: http://localhost:8080/api
    - Neo4j Browser: http://localhost:7474
    - PostgreSQL: localhost:5432
@@ -83,15 +88,15 @@ VamsaSetu is an intelligent, tree-based family relationship visualization and ev
 2. **Backend setup**
    ```bash
    cd backend
-   ./mvnw clean install
-   ./mvnw spring-boot:run
+   go mod download
+   go run cmd/server/main.go
    ```
 
 3. **Frontend setup**
    ```bash
    cd frontend
    npm install
-   npm start
+   npm run dev
    ```
 
 ## 📁 Project Structure
@@ -101,22 +106,44 @@ vamsasetu/
 ├── frontend/                 # React TypeScript frontend
 │   ├── src/
 │   │   ├── components/      # Reusable UI components
+│   │   │   ├── auth/       # Authentication components
+│   │   │   ├── common/     # Common components (Layout, Navbar, etc.)
+│   │   │   ├── events/     # Event-related components
+│   │   │   ├── family/     # Family tree components
+│   │   │   └── ui/         # Base UI components
 │   │   ├── pages/          # Page components
 │   │   ├── services/       # API services
+│   │   ├── hooks/          # React Query hooks
+│   │   ├── stores/         # Zustand state management
 │   │   ├── types/          # TypeScript type definitions
-│   │   └── contexts/       # React contexts
+│   │   └── utils/          # Utility functions
 │   ├── public/             # Static assets
 │   └── package.json
-├── backend/                 # Spring Boot backend
-│   ├── src/main/java/
-│   │   ├── controller/     # REST controllers
-│   │   ├── service/        # Business logic
+├── backend/                 # Go + Fiber backend
+│   ├── cmd/server/         # Main application entry point
+│   ├── internal/
+│   │   ├── config/         # Configuration management
+│   │   ├── handler/        # HTTP handlers
+│   │   ├── middleware/     # Middleware (auth, CORS, logging)
+│   │   ├── models/         # Data models
 │   │   ├── repository/     # Data access layer
-│   │   ├── model/          # Entity models
-│   │   ├── security/       # Security configuration
-│   │   └── config/         # Application configuration
-│   └── pom.xml
+│   │   ├── scheduler/      # Background jobs
+│   │   ├── service/        # Business logic
+│   │   └── utils/          # Utility functions
+│   ├── pkg/                # Shared packages
+│   │   ├── neo4j/         # Neo4j client
+│   │   ├── postgres/      # PostgreSQL client
+│   │   └── redis/         # Redis client
+│   ├── go.mod
+│   └── go.sum
+├── .kiro/                  # Kiro spec files
+│   └── specs/
+│       └── vamsasetu-full-system/
+│           ├── requirements.md
+│           ├── design.md
+│           └── tasks.md
 ├── docker-compose.yml      # Multi-container setup
+├── .env.example           # Environment variables template
 └── README.md
 ```
 
@@ -124,67 +151,94 @@ vamsasetu/
 
 ### Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory (use `.env.example` as template):
 
 ```env
-# Database
-POSTGRES_URL=jdbc:postgresql://localhost:5432/vamsasetu
-POSTGRES_USERNAME=vamsasetu
+# Database Configuration
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=vamsasetu
+POSTGRES_USER=vamsasetu
 POSTGRES_PASSWORD=vamsasetu123
 
 NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=neo4j
 NEO4J_PASSWORD=vamsasetu123
 
-# Redis
+# Redis Configuration
 REDIS_HOST=localhost
 REDIS_PORT=6379
+REDIS_PASSWORD=
 
-# JWT
-JWT_SECRET=your-secret-key-here
+# JWT Configuration
+JWT_SECRET=your-secret-key-change-this-in-production
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
 
-# Email
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
+# Server Configuration
+PORT=8080
+FRONTEND_URL=http://localhost:5173
 
-# Twilio
+# Notification Services
 TWILIO_ACCOUNT_SID=your-account-sid
 TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_PHONE_NUMBER=your-phone-number
+TWILIO_PHONE_NUMBER=+1234567890
+TWILIO_WHATSAPP_NUMBER=whatsapp:+1234567890
 
-# WhatsApp
-WHATSAPP_API_URL=your-whatsapp-api-url
-WHATSAPP_ACCESS_TOKEN=your-access-token
+SENDGRID_API_KEY=your-sendgrid-api-key
+SENDGRID_FROM_EMAIL=noreply@vamsasetu.com
+SENDGRID_FROM_NAME=VamsaSetu
+
+# Application Settings
+LOG_LEVEL=info
+NOTIFICATION_DAYS_AHEAD=7
 ```
 
 ## 📚 API Documentation
 
 ### Authentication Endpoints
-- `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/refresh` - Refresh access token
 - `GET /api/auth/profile` - Get user profile
 
+### Member Endpoints
+- `GET /api/members` - Get all family members (with pagination)
+- `GET /api/members/:id` - Get member by ID
+- `POST /api/members` - Add family member (owner/admin only)
+- `PUT /api/members/:id` - Update member (owner/admin only)
+- `DELETE /api/members/:id` - Soft delete member (owner/admin only)
+- `GET /api/members/search?q=name` - Search members by name
+
+### Relationship Endpoints
+- `GET /api/relationships` - Get all relationships
+- `POST /api/relationships` - Add relationship (owner/admin only)
+- `DELETE /api/relationships/:id` - Delete relationship (owner/admin only)
+- `GET /api/relationships/path?from=uuid1&to=uuid2` - Find relationship path
+
 ### Family Tree Endpoints
-- `GET /api/family/members` - Get family members
-- `POST /api/family/members` - Add family member
-- `GET /api/family/relationships` - Get relationships
-- `POST /api/family/relationships` - Add relationship
-- `GET /api/family/tree` - Get family tree data
+- `GET /api/family/tree` - Get family tree data (React Flow format)
 
 ### Event Endpoints
-- `GET /api/events` - Get events
-- `POST /api/events` - Create event
-- `PUT /api/events/{id}` - Update event
-- `DELETE /api/events/{id}` - Delete event
+- `GET /api/events` - Get events (with filters)
+- `GET /api/events/:id` - Get event by ID
+- `POST /api/events` - Create event (owner/admin only)
+- `PUT /api/events/:id` - Update event (owner/admin only)
+- `DELETE /api/events/:id` - Delete event (owner/admin only)
+- `GET /api/events/upcoming` - Get upcoming events
+
+### WebSocket Endpoint
+- `WS /api/ws` - WebSocket connection for real-time updates
+
+### Health Check
+- `GET /health` - Application health status
 
 ## 🧪 Testing
 
 ### Backend Tests
 ```bash
 cd backend
-./mvnw test
+go test ./... -v
 ```
 
 ### Frontend Tests
@@ -193,9 +247,15 @@ cd frontend
 npm test
 ```
 
-### Integration Tests
+### Build Verification
 ```bash
-docker-compose -f docker-compose.test.yml up --abort-on-container-exit
+# Backend
+cd backend
+go build -o bin/server cmd/server/main.go
+
+# Frontend
+cd frontend
+npm run build
 ```
 
 ## 🚀 Deployment
@@ -249,6 +309,9 @@ For support, email support@vamsasetu.com or join our Slack channel.
 ## 🙏 Acknowledgments
 
 - React Flow for tree visualization
-- Spring Boot for robust backend
+- Go Fiber for high-performance backend
 - Neo4j for graph database capabilities
-- Tailwind CSS for beautiful UI components
+- Tailwind CSS v4 for beautiful UI components
+- Framer Motion for smooth animations
+- React Query for efficient data fetching
+- Zustand for lightweight state management
