@@ -1,11 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LoginForm from '../components/auth/LoginForm';
 import Card, { CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/ui/Card';
+import { useAuthStore } from '../stores/authStore';
+import authService from '../services/authService';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
+
+  // Auto-login with real backend authentication
+  useEffect(() => {
+    const autoLogin = async () => {
+      try {
+        const response = await authService.login({
+          email: 'demo@vamsasetu.com',
+          password: 'Demo@1234',
+        });
+        
+        if (response.success && response.data) {
+          const { user, accessToken, refreshToken } = response.data;
+          setAuth(user, accessToken, refreshToken);
+          navigate('/dashboard');
+        }
+      } catch (error) {
+        console.error('Auto-login failed:', error);
+      }
+    };
+    
+    autoLogin();
+  }, [navigate, setAuth]);
 
   const handleLoginSuccess = () => {
     navigate('/dashboard');

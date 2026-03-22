@@ -176,8 +176,9 @@ func createEvent(ctx context.Context, repo *repository.EventRepository, title, d
 		Description: description,
 		EventDate:   eventDate,
 		EventType:   eventType,
-		MemberIDs:   memberIDs,
+		CreatedBy:   1, // Demo user ID
 	}
+	event.SetMemberIDs(memberIDs)
 	if err := repo.Create(ctx, event); err != nil {
 		log.Printf("Warning: Failed to create event %s: %v", title, err)
 	} else {

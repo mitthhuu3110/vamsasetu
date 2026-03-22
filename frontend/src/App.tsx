@@ -23,14 +23,9 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected Route wrapper
+// Protected Route wrapper - DISABLED FOR TESTING
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { accessToken } = useAuthStore();
-  
-  if (!accessToken) {
-    return <Navigate to="/login" replace />;
-  }
-  
+  // Skip authentication check - allow all access
   return <>{children}</>;
 };
 
@@ -88,8 +83,9 @@ function App() {
               </ProtectedRoute>
             } />
             
-            {/* Default redirect */}
+            {/* Default redirect - skip login, go straight to dashboard */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </BrowserRouter>

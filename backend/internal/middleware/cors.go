@@ -9,10 +9,10 @@ import (
 // Allows credentials for authentication and configures allowed methods and headers
 func CORSMiddleware(frontendOrigin string) fiber.Handler {
 	return cors.New(cors.Config{
-		AllowOrigins:     frontendOrigin,
+		AllowOrigins:     "*", // Allow all origins in development
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
-		AllowCredentials: true,
+		AllowCredentials: false, // Must be false when AllowOrigins is *
 		MaxAge:           86400, // 24 hours
 	})
 }

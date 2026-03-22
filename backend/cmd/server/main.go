@@ -12,7 +12,6 @@ import (
 	"vamsasetu/backend/internal/config"
 	"vamsasetu/backend/internal/handler"
 	"vamsasetu/backend/internal/middleware"
-	"vamsasetu/backend/internal/models"
 	"vamsasetu/backend/internal/repository"
 	"vamsasetu/backend/internal/scheduler"
 	"vamsasetu/backend/internal/service"
@@ -246,40 +245,104 @@ func initializeDatabases(cfg *config.Config) (*postgres.Client, *neo4j.Client, *
 	return pgClient, neo4jClient, redisClientInstance, nil
 }
 
-// runMigrations executes GORM AutoMigrate for all models
+// runMigrations executes manual SQL migrations for all models
 func runMigrations(pgClient *postgres.Client) error {
-	// Auto-migrate User first
-	log.Println("Migrating User table...")
-	if err := pgClient.DB.AutoMigrate(&models.User{}); err != nil {
-		log.Printf("User migration failed: %v", err)
+	// Create tables using raw SQL
+	sqlDB, err := pgClient.DB.DB()
+	if err != nil {
+		return fmt.Errorf("failed to get underlying sql.DB: %w", err)
+	}
+
+	// Create users table
+	log.Println("Creating users table...")
+	_, err = sqlDB.Exec(`
+		CREATE TABLE IF NOT EXISTS users (
+			id SERIAL PRIMARY KEY,
+			email VARCHAR(255) UNIQUE NOT NULL,
+			password_hash VARCHAR(255) NOT NULL,
+			name VARCHAR(255) NOT NULL,
+			role VARCHAR(50) NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+	`)
+	if err != nil {
+		log.Printf("Failed to create users table: %v", err)
 		return err
 	}
-	log.Println("✓ Migrated User table")
+	log.Println("✓ Created users table")
 
-	// Auto-migrate Event
-	log.Println("Migrating Event table...")
-	if err := pgClient.DB.AutoMigrate(&models.Event{}); err != nil {
-		log.Printf("Event migration failed: %v", err)
+	// Create events table
+	log.Println("Creating events table...")
+	_, err = sqlDB.Exec(`
+		CREATE TABLE IF NOT EXISTS events (
+			id SERIAL PRIMARY KEY,
+			title VARCHAR(255) NOT NULL,
+			description TEXT,
+			event_date TIMESTAMP NOT NULL,
+			event_type VARCHAR(50) NOT NULL,
+			member_ids TEXT NOT NULL,
+			created_by INTEGER NOT NULL,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_events_event_date ON events(event_date);
+		CREATE INDEX IF NOT EXISTS idx_events_created_by ON events(created_by);
+	`)
+	if err != nil {
+		log.Printf("Failed to create events table: %v", err)
 		return err
 	}
-	log.Println("✓ Migrated Event table")
+	log.Println("✓ Created events table")
 
-	// Auto-migrate Notification
-	log.Println("Migrating Notification table...")
-	if err := pgClient.DB.AutoMigrate(&models.Notification{}); err != nil {
-		log.Printf("Notification migration failed: %v", err)
+	// Create notifications table
+	log.Println("Creating notifications table...")
+	_, err = sqlDB.Exec(`
+		CREATE TABLE IF NOT EXISTS notifications (
+			id SERIAL PRIMARY KEY,
+			event_id INTEGER NOT NULL,
+			user_id INTEGER NOT NULL,
+			channel VARCHAR(50) NOT NULL,
+			scheduled_at TIMESTAMP NOT NULL,
+			sent_at TIMESTAMP,
+			status VARCHAR(50) NOT NULL,
+			retry_count INTEGER DEFAULT 0,
+			error_msg TEXT,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_notifications_event_id ON notifications(event_id);
+		CREATE INDEX IF NOT EXISTS idx_notifications_scheduled ON notifications(scheduled_at, status);
+	`)
+	if err != nil {
+		log.Printf("Failed to create notifications table: %v", err)
 		return err
 	}
-	log.Println("✓ Migrated Notification table")
+	log.Println("✓ Created notifications table")
 
-	// Auto-migrate AuditLog
-	log.Println("Migrating AuditLog table...")
-	if err := pgClient.DB.AutoMigrate(&models.AuditLog{}); err != nil {
-		log.Printf("AuditLog migration failed: %v", err)
+	// Create audit_logs table
+	log.Println("Creating audit_logs table...")
+	_, err = sqlDB.Exec(`
+		CREATE TABLE IF NOT EXISTS audit_logs (
+			id SERIAL PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			action VARCHAR(100) NOT NULL,
+			entity_type VARCHAR(50) NOT NULL,
+			entity_id VARCHAR(255) NOT NULL,
+			details JSONB,
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+		CREATE INDEX IF NOT EXISTS idx_audit_logs_user ON audit_logs(user_id);
+		CREATE INDEX IF NOT EXISTS idx_audit_logs_created ON audit_logs(created_at);
+	`)
+	if err != nil {
+		log.Printf("Failed to create audit_logs table: %v", err)
 		return err
 	}
-	log.Println("✓ Migrated AuditLog table")
+	log.Println("✓ Created audit_logs table")
 
+	log.Println("✓ All database migrations completed successfully")
 	return nil
 }
 
